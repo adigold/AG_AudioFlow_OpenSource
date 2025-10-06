@@ -22,7 +22,7 @@ A simple command-line tool and macOS Services integration for audio processing. 
 ```bash
 git clone https://github.com/adigold/AG_AudioFlow_OpenSource.git
 cd AG_AudioFlow_OpenSource
-sudo ./install.sh
+sudo ./install_AG_AudioFlow.sh
 ```
 
 ### Enable Services

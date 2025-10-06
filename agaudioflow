@@ -1,0 +1,117 @@
+#!/usr/bin/env node
+
+// AG AudioFlow - Simple Audio Processing Tool for Mac
+// Processes audio files and puts results next to the original file
+
+const { execSync } = require('child_process');
+const path = require('path');
+const fs = require('fs');
+
+// Find FFmpeg
+function findFFmpeg() {
+  const paths = ['/opt/homebrew/bin/ffmpeg', '/usr/local/bin/ffmpeg', '/usr/bin/ffmpeg', 'ffmpeg'];
+  for (const ffmpegPath of paths) {
+    try {
+      execSync(`${ffmpegPath} -version`, { stdio: 'pipe' });
+      return ffmpegPath;
+    } catch (error) {
+      continue;
+    }
+  }
+  throw new Error('FFmpeg not found. Install with: brew install ffmpeg');
+}
+
+// Generate output filename next to the original
+function getOutputPath(inputPath, suffix) {
+  const dir = path.dirname(inputPath);
+  const name = path.parse(inputPath).name;
+  const ext = path.extname(inputPath);
+  return path.join(dir, `${name}_${suffix}${ext}`);
+}
+
+// Main processing function
+function processAudio(inputFile, action) {
+  const ffmpeg = findFFmpeg();
+
+  try {
+    let outputFile;
+    let command;
+
+    switch (action) {
+      case 'stereo-to-mono':
+        outputFile = getOutputPath(inputFile, 'mono');
+        command = `"${ffmpeg}" -i "${inputFile}" -ac 1 "${outputFile}"`;
+        break;
+
+      case 'normalize':
+        outputFile = getOutputPath(inputFile, 'normalized');
+        command = `"${ffmpeg}" -i "${inputFile}" -af loudnorm "${outputFile}"`;
+        break;
+
+      case 'volume-up':
+        outputFile = getOutputPath(inputFile, 'louder');
+        command = `"${ffmpeg}" -i "${inputFile}" -af "volume=5dB" "${outputFile}"`;
+        break;
+
+      case 'volume-down':
+        outputFile = getOutputPath(inputFile, 'quieter');
+        command = `"${ffmpeg}" -i "${inputFile}" -af "volume=-5dB" "${outputFile}"`;
+        break;
+
+      case 'convert-mp3':
+        outputFile = getOutputPath(inputFile, 'converted').replace(path.extname(inputFile), '.mp3');
+        command = `"${ffmpeg}" -i "${inputFile}" -codec:a mp3 "${outputFile}"`;
+        break;
+
+      case 'convert-wav':
+        outputFile = getOutputPath(inputFile, 'converted').replace(path.extname(inputFile), '.wav');
+        command = `"${ffmpeg}" -i "${inputFile}" -codec:a pcm_s16le "${outputFile}"`;
+        break;
+
+      case 'trim-silence':
+        outputFile = getOutputPath(inputFile, 'trimmed');
+        command = `"${ffmpeg}" -i "${inputFile}" -af silenceremove=start_periods=1:start_duration=1:start_threshold=-50dB:detection=peak,areverse,silenceremove=start_periods=1:start_duration=1:start_threshold=-50dB:detection=peak,areverse "${outputFile}"`;
+        break;
+
+      case 'speed-up':
+        outputFile = getOutputPath(inputFile, 'faster');
+        command = `"${ffmpeg}" -i "${inputFile}" -af "atempo=1.5" "${outputFile}"`;
+        break;
+
+      default:
+        throw new Error(`Unknown action: ${action}`);
+    }
+
+    console.log(`Processing: ${path.basename(inputFile)}`);
+    execSync(command, { stdio: 'pipe' });
+    console.log(`✓ Created: ${path.basename(outputFile)}`);
+
+    return outputFile;
+
+  } catch (error) {
+    console.error(`Error: ${error.message}`);
+    process.exit(1);
+  }
+}
+
+// CLI usage
+if (require.main === module) {
+  const args = process.argv.slice(2);
+
+  if (args.length < 2) {
+    console.log('Usage: agaudioflow <action> <audio-file>');
+    console.log('Actions: stereo-to-mono, normalize, volume-up, volume-down, convert-mp3, convert-wav, trim-silence, speed-up');
+    process.exit(1);
+  }
+
+  const [action, inputFile] = args;
+
+  if (!fs.existsSync(inputFile)) {
+    console.error(`File not found: ${inputFile}`);
+    process.exit(1);
+  }
+
+  processAudio(inputFile, action);
+}
+
+module.exports = { processAudio };

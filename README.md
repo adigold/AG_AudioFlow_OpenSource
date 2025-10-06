@@ -10,6 +10,7 @@ A simple command-line tool and macOS Services integration for audio processing. 
 - **Format Conversion** - Convert to MP3 or WAV
 - **Trim Silence** - Remove silence from beginning and end
 - **Speed Up** - Increase playback speed by 1.5x
+- **Get Info** - Display detailed audio file information in a popup
 
 ## Installation
 
@@ -93,6 +94,7 @@ brew install node
 - `convert-wav` - Convert to WAV format
 - `trim-silence` - Remove silence from start/end
 - `speed-up` - Increase speed by 1.5x
+- `get-info` - Show file info (duration, codec, bitrate, etc.)
 
 ## How It Works
 

@@ -159,6 +159,7 @@ create_service "convert-mp3" "Convert to MP3"
 create_service "convert-wav" "Convert to WAV"
 create_service "trim-silence" "Trim Silence"
 create_service "speed-up" "Speed Up"
+create_service "get-info" "Get Info"
 
 echo ""
 echo "🔄 Refreshing Services..."

@@ -78,6 +78,51 @@ function processAudio(inputFile, action) {
         command = `"${ffmpeg}" -i "${inputFile}" -af "atempo=1.5" "${outputFile}"`;
         break;
 
+      case 'get-info':
+        // Get audio file information and show in popup
+        const infoCommand = `"${ffmpeg}" -i "${inputFile}" 2>&1`;
+        let info;
+        try {
+          info = execSync(infoCommand, { encoding: 'utf8' });
+        } catch (error) {
+          // FFmpeg returns non-zero for info, but the output is in stderr
+          info = error.stdout || error.stderr || error.toString();
+        }
+
+        // Parse the info
+        const duration = info.match(/Duration: ([^,]+)/)?.[1] || 'Unknown';
+        const bitrate = info.match(/bitrate: (.+)/)?.[1] || 'Unknown';
+        const audioInfo = info.match(/Audio: (.+)/)?.[1] || 'Unknown';
+
+        // Parse audio details
+        const audioMatch = audioInfo.match(/([^,]+), (\d+) Hz, ([^,]+), ([^,]+)/);
+        const codec = audioMatch?.[1] || 'Unknown';
+        const sampleRate = audioMatch?.[2] ? `${audioMatch[2]} Hz` : 'Unknown';
+        const channels = audioMatch?.[3] || 'Unknown';
+
+        // Get file size
+        const stats = fs.statSync(inputFile);
+        const fileSizeMB = (stats.size / (1024 * 1024)).toFixed(2);
+
+        // Create AppleScript to show dialog
+        const message = `File: ${path.basename(inputFile)}
+Size: ${fileSizeMB} MB
+Duration: ${duration}
+Codec: ${codec}
+Sample Rate: ${sampleRate}
+Channels: ${channels}
+Bitrate: ${bitrate}`;
+
+        const appleScript = `display dialog "${message}" with title "AG AudioFlow - Audio Info" buttons {"OK"} default button "OK" with icon note`;
+        try {
+          execSync(`osascript -e '${appleScript}'`);
+        } catch (e) {
+          // Dialog was shown, user clicked OK
+        }
+
+        console.log(`✓ Displayed info for: ${path.basename(inputFile)}`);
+        return; // Don't create output file for info
+
       default:
         throw new Error(`Unknown action: ${action}`);
     }
@@ -100,7 +145,7 @@ if (require.main === module) {
 
   if (args.length < 2) {
     console.log('Usage: agaudioflow <action> <audio-file>');
-    console.log('Actions: stereo-to-mono, normalize, volume-up, volume-down, convert-mp3, convert-wav, trim-silence, speed-up');
+    console.log('Actions: stereo-to-mono, normalize, volume-up, volume-down, convert-mp3, convert-wav, trim-silence, speed-up, get-info');
     process.exit(1);
   }
 

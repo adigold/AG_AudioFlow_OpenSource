@@ -128,7 +128,17 @@ Bitrate: ${bitrate}`;
     }
 
     console.log(`Processing: ${path.basename(inputFile)}`);
-    execSync(command, { stdio: 'pipe' });
+    try {
+      execSync(command, {
+        stdio: 'pipe',
+        timeout: 30000 // 30 second timeout
+      });
+    } catch (error) {
+      if (error.code === 'ETIMEDOUT') {
+        throw new Error('Processing timed out after 30 seconds');
+      }
+      throw error;
+    }
     console.log(`✓ Created: ${path.basename(outputFile)}`);
 
     return outputFile;

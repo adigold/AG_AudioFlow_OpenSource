@@ -120,8 +120,14 @@ mkdir -p "$QUICK_ACTIONS_DIR"
 # Return to original directory
 cd "$OLDPWD"
 
-# Install Quick Actions
-./setup-mac-services.sh
+# Install Quick Actions (using simple approach to avoid corruption)
+echo "Setting up Quick Actions..."
+if ./setup-quick-actions-simple.sh; then
+    echo "✅ Quick Actions installed successfully"
+else
+    echo "⚠️  Quick Actions installation had issues, but CLI is working"
+    echo "   You can manually run ./setup-quick-actions-simple.sh later"
+fi
 
 # Cleanup
 rm -rf "$TEMP_DIR"

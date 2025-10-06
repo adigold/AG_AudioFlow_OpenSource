@@ -48,6 +48,13 @@ create_workflow() {
                 <string>com.microsoft.waveform-audio</string>
                 <string>org.xiph.flac</string>
                 <string>org.xiph.ogg-audio</string>
+                <string>public.movie</string>
+                <string>public.video</string>
+                <string>public.mpeg-4</string>
+                <string>com.apple.quicktime-movie</string>
+                <string>public.avi</string>
+                <string>org.webmproject.webm</string>
+                <string>public.3gpp</string>
             </array>
         </dict>
     </array>
@@ -493,8 +500,201 @@ for f in "$@"; do
     fi
 done'
 
+# 16. Convert to AAC
+create_workflow "Convert to AAC" '#!/bin/bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+for f in "$@"; do
+    if command -v agaudioflow &> /dev/null; then
+        agaudioflow convert "$f" aac
+        osascript -e "display notification \"Converted to AAC: $(basename "$f")\" with title \"AG AudioFlow\""
+    else
+        osascript -e "display notification \"AG AudioFlow CLI not found. Please run install.sh\" with title \"AG AudioFlow Error\""
+    fi
+done'
+
+# 17. Convert to OGG
+create_workflow "Convert to OGG" '#!/bin/bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+for f in "$@"; do
+    if command -v agaudioflow &> /dev/null; then
+        agaudioflow convert "$f" ogg
+        osascript -e "display notification \"Converted to OGG: $(basename "$f")\" with title \"AG AudioFlow\""
+    else
+        osascript -e "display notification \"AG AudioFlow CLI not found. Please run install.sh\" with title \"AG AudioFlow Error\""
+    fi
+done'
+
+# 18. Force Mono (1 Channel)
+create_workflow "Force Mono (1 Channel)" '#!/bin/bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+for f in "$@"; do
+    if command -v agaudioflow &> /dev/null; then
+        agaudioflow channels "$f" 1
+        osascript -e "display notification \"Converted to mono: $(basename "$f")\" with title \"AG AudioFlow\""
+    else
+        osascript -e "display notification \"AG AudioFlow CLI not found. Please run install.sh\" with title \"AG AudioFlow Error\""
+    fi
+done'
+
+# 19. Force Stereo (2 Channels)
+create_workflow "Force Stereo (2 Channels)" '#!/bin/bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+for f in "$@"; do
+    if command -v agaudioflow &> /dev/null; then
+        agaudioflow channels "$f" 2
+        osascript -e "display notification \"Converted to stereo: $(basename "$f")\" with title \"AG AudioFlow\""
+    else
+        osascript -e "display notification \"AG AudioFlow CLI not found. Please run install.sh\" with title \"AG AudioFlow Error\""
+    fi
+done'
+
+# 20. Upsample to 48kHz
+create_workflow "Upsample to 48kHz" '#!/bin/bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+for f in "$@"; do
+    if command -v agaudioflow &> /dev/null; then
+        agaudioflow sample-rate "$f" 48000
+        osascript -e "display notification \"Upsampled to 48kHz: $(basename "$f")\" with title \"AG AudioFlow\""
+    else
+        osascript -e "display notification \"AG AudioFlow CLI not found. Please run install.sh\" with title \"AG AudioFlow Error\""
+    fi
+done'
+
+# 21. Downsample to 44.1kHz (CD Quality)
+create_workflow "CD Quality (44.1kHz)" '#!/bin/bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+for f in "$@"; do
+    if command -v agaudioflow &> /dev/null; then
+        agaudioflow sample-rate "$f" 44100
+        osascript -e "display notification \"Converted to CD quality: $(basename "$f")\" with title \"AG AudioFlow\""
+    else
+        osascript -e "display notification \"AG AudioFlow CLI not found. Please run install.sh\" with title \"AG AudioFlow Error\""
+    fi
+done'
+
+# 22. Apply Treble Boost
+create_workflow "Apply Treble Boost" '#!/bin/bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+for f in "$@"; do
+    if command -v agaudioflow &> /dev/null; then
+        agaudioflow eq "$f" treble
+        osascript -e "display notification \"Applied treble boost: $(basename "$f")\" with title \"AG AudioFlow\""
+    else
+        osascript -e "display notification \"AG AudioFlow CLI not found. Please run install.sh\" with title \"AG AudioFlow Error\""
+    fi
+done'
+
+# 23. Apply Vocal Enhancement
+create_workflow "Vocal Enhancement" '#!/bin/bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+for f in "$@"; do
+    if command -v agaudioflow &> /dev/null; then
+        agaudioflow eq "$f" vocal
+        osascript -e "display notification \"Applied vocal enhancement: $(basename "$f")\" with title \"AG AudioFlow\""
+    else
+        osascript -e "display notification \"AG AudioFlow CLI not found. Please run install.sh\" with title \"AG AudioFlow Error\""
+    fi
+done'
+
+# 24. Apply Loudness Enhancement
+create_workflow "Loudness Enhancement" '#!/bin/bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+for f in "$@"; do
+    if command -v agaudioflow &> /dev/null; then
+        agaudioflow eq "$f" loudness
+        osascript -e "display notification \"Applied loudness enhancement: $(basename "$f")\" with title \"AG AudioFlow\""
+    else
+        osascript -e "display notification \"AG AudioFlow CLI not found. Please run install.sh\" with title \"AG AudioFlow Error\""
+    fi
+done'
+
+# 25. Slow Down (50%)
+create_workflow "Slow Down (50%)" '#!/bin/bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+for f in "$@"; do
+    if command -v agaudioflow &> /dev/null; then
+        agaudioflow speed "$f" 50
+        osascript -e "display notification \"Slowed down to 50%: $(basename "$f")\" with title \"AG AudioFlow\""
+    else
+        osascript -e "display notification \"AG AudioFlow CLI not found. Please run install.sh\" with title \"AG AudioFlow Error\""
+    fi
+done'
+
+# 26. Speed Up (200% - Double)
+create_workflow "Double Speed (200%)" '#!/bin/bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+for f in "$@"; do
+    if command -v agaudioflow &> /dev/null; then
+        agaudioflow speed "$f" 200
+        osascript -e "display notification \"Doubled speed to 200%: $(basename "$f")\" with title \"AG AudioFlow\""
+    else
+        osascript -e "display notification \"AG AudioFlow CLI not found. Please run install.sh\" with title \"AG AudioFlow Error\""
+    fi
+done'
+
+# 27. Normalize for Spotify (-14 LUFS)
+create_workflow "Normalize for Spotify" '#!/bin/bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+for f in "$@"; do
+    if command -v agaudioflow &> /dev/null; then
+        agaudioflow normalize "$f" -14
+        osascript -e "display notification \"Normalized for Spotify: $(basename "$f")\" with title \"AG AudioFlow\""
+    else
+        osascript -e "display notification \"AG AudioFlow CLI not found. Please run install.sh\" with title \"AG AudioFlow Error\""
+    fi
+done'
+
+# 28. Normalize for Broadcast (-23 LUFS)
+create_workflow "Normalize for Broadcast" '#!/bin/bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+for f in "$@"; do
+    if command -v agaudioflow &> /dev/null; then
+        agaudioflow normalize "$f" -23
+        osascript -e "display notification \"Normalized for broadcast: $(basename "$f")\" with title \"AG AudioFlow\""
+    else
+        osascript -e "display notification \"AG AudioFlow CLI not found. Please run install.sh\" with title \"AG AudioFlow Error\""
+    fi
+done'
+
+# 29. High Volume Boost (+10dB)
+create_workflow "High Volume Boost (+10dB)" '#!/bin/bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+for f in "$@"; do
+    if command -v agaudioflow &> /dev/null; then
+        agaudioflow volume "$f" 10
+        osascript -e "display notification \"High volume boost applied: $(basename "$f")\" with title \"AG AudioFlow\""
+    else
+        osascript -e "display notification \"AG AudioFlow CLI not found. Please run install.sh\" with title \"AG AudioFlow Error\""
+    fi
+done'
+
+# 30. Significant Volume Reduction (-10dB)
+create_workflow "Volume Reduction (-10dB)" '#!/bin/bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+for f in "$@"; do
+    if command -v agaudioflow &> /dev/null; then
+        agaudioflow volume "$f" -10
+        osascript -e "display notification \"Volume reduced: $(basename "$f")\" with title \"AG AudioFlow\""
+    else
+        osascript -e "display notification \"AG AudioFlow CLI not found. Please run install.sh\" with title \"AG AudioFlow Error\""
+    fi
+done'
+
 echo ""
 echo "✅ AG AudioFlow Quick Actions have been installed!"
+echo ""
+echo "📊 Installed Quick Actions (30 total):"
+echo "   🎵 Format Conversion: MP3, WAV, FLAC, AAC, OGG"
+echo "   🎚️ Stereo Processing: Stereo↔Mono, Split Channels"
+echo "   📊 Normalization: General, Spotify (-14), Broadcast (-23)"
+echo "   🔊 Volume Control: +5dB, -5dB, +10dB, -10dB"
+echo "   ✂️ Audio Enhancement: Trim Silence, Fade Effects"
+echo "   ⚡ Speed Control: 50%, 150%, 200% (with pitch preservation)"
+echo "   🎛️ EQ Presets: Bass, Treble, Vocal, Loudness"
+echo "   🔧 Technical: Force Mono/Stereo, 44.1kHz/48kHz resampling"
+echo "   🎬 Video Support: Extract Audio from Video"
+echo "   🔄 Effects: Reverse Audio"
+echo "   📋 Utility: Get Audio Information"
 echo ""
 echo "To use them:"
 echo "1. Right-click on any audio file in Finder"

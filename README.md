@@ -78,9 +78,10 @@ Whether you're preparing podcast episodes, mastering music tracks, converting au
 
 ### 🖱️ macOS Quick Actions
 - Right-click audio processing in Finder
-- 15+ Quick Actions for common operations
+- 30 Quick Actions for comprehensive audio processing
 - Process multiple files at once
 - System notifications for completion
+- Support for both audio and video files
 
 ### 📋 Audio File Information
 - View detailed metadata for audio files
@@ -341,30 +342,56 @@ agaudioflow info track.mp3
 
 ## 🖱️ macOS Quick Actions
 
-After installation, right-click any audio file in Finder to access:
+After installation, right-click any audio or video file in Finder to access **30 comprehensive Quick Actions**:
 
-### Basic Actions
+### Basic Audio Processing
 - **Stereo to Mono** - Convert stereo files to mono
 - **Split Stereo** - Split into left and right channels
 - **Normalize Audio** - Standardize volume levels
 - **Trim Silence** - Remove quiet sections
 
-### Format Conversion
+### Format Conversion (5 formats)
 - **Convert to MP3** - Compress for smaller file size
 - **Convert to WAV** - Uncompressed high quality
 - **Convert to FLAC** - Lossless compression
+- **Convert to AAC** - Apple-optimized format
+- **Convert to OGG** - Open-source format
 
-### Audio Effects
+### Volume Control (4 levels)
 - **Increase Volume (+5dB)** - Make audio louder
 - **Decrease Volume (-5dB)** - Make audio quieter
-- **Add Fade Effects (2s)** - Add fade in/out
-- **Speed Up (1.5x)** - Increase playback speed
+- **High Volume Boost (+10dB)** - Significant increase
+- **Volume Reduction (-10dB)** - Significant decrease
+
+### Professional Normalization
+- **Normalize Audio** - General purpose normalization
+- **Normalize for Spotify** - Optimize for Spotify (-14 LUFS)
+- **Normalize for Broadcast** - TV/Radio standard (-23 LUFS)
+
+### Speed Control (4 speeds)
+- **Slow Down (50%)** - Half speed for transcription
+- **Speed Up (1.5x)** - Comfortable increase
+- **Double Speed (200%)** - Fast review
+- **Add Fade Effects (2s)** - Professional transitions
+
+### EQ and Enhancement (4 presets)
 - **Apply Bass Boost** - Enhance low frequencies
+- **Apply Treble Boost** - Enhance high frequencies
+- **Vocal Enhancement** - Optimize for speech
+- **Loudness Enhancement** - Professional loudness
+
+### Technical Processing
+- **Force Mono (1 Channel)** - Convert any audio to mono
+- **Force Stereo (2 Channels)** - Convert to stereo
+- **CD Quality (44.1kHz)** - Standard CD sample rate
+- **Upsample to 48kHz** - Professional sample rate
+
+### Special Effects
 - **Reverse Audio** - Play backwards
+- **Extract Audio from Video** - Get audio from video files
 
 ### Utility
-- **Extract Audio from Video** - Get audio track from video files
-- **Get Audio Info** - Display file information dialog
+- **Get Audio Info** - Display detailed file information
 
 ### Enabling Quick Actions
 
@@ -584,7 +611,7 @@ Contributions are welcome! Please feel free to submit issues, feature requests, 
 - 📁 **Batch Processing** - Process multiple files with pattern matching
 - 🔗 **Audio Merging** - Combine files with optional crossfade
 - 🎬 **Video Support** - Extract audio from video files
-- 🖱️ **macOS Integration** - 15 Quick Actions for right-click processing
+- 🖱️ **macOS Integration** - 30 Quick Actions for right-click processing
 - 🎛️ **Advanced Effects** - EQ presets, audio reversal, channel manipulation
 
 ---

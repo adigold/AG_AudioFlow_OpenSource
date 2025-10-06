@@ -13,16 +13,47 @@ A simple command-line tool and macOS Services integration for audio processing. 
 
 ## Installation
 
-1. Clone or download this repository
-2. Run the setup script:
+### Prerequisites
+- macOS 10.13 or later
+- Homebrew (for FFmpeg installation)
+- Node.js (install with: `brew install node`)
+- FFmpeg (install with: `brew install ffmpeg`)
+
+### Install AG AudioFlow Services
+
+1. **Clone the repository:**
+```bash
+git clone https://github.com/adigold/AG_AudioFlow_OpenSource.git
+cd AG_AudioFlow_OpenSource
+```
+
+2. **Run the setup script:**
 ```bash
 chmod +x simple-services.sh
 ./simple-services.sh
 ```
 
-3. Enable Services in System Preferences:
+3. **Enable Services in System Preferences:**
    - Go to **System Preferences > Keyboard > Shortcuts > Services**
-   - Look for "AG AudioFlow" services and enable them
+   - Scroll down to find "AG AudioFlow" services
+   - Check the boxes to enable the services you want to use
+
+4. **Restart Finder (optional):**
+```bash
+killall Finder
+```
+
+## Uninstall
+
+To completely remove AG AudioFlow services:
+
+```bash
+# Remove all AG AudioFlow services
+rm -rf ~/Library/Services/AG\ AudioFlow*
+
+# Restart Finder to refresh Services menu
+killall Finder
+```
 
 ## Usage
 
@@ -42,10 +73,24 @@ chmod +x simple-services.sh
 3. Choose an **AG AudioFlow** action
 4. The processed file will appear next to the original
 
-## Requirements
+## Troubleshooting
 
-- macOS
-- FFmpeg (installed automatically with Homebrew)
+### Common Issues
+
+**Services not appearing in right-click menu:**
+1. Make sure services are enabled in System Preferences > Keyboard > Shortcuts > Services
+2. Restart Finder: `killall Finder`
+3. Try running the setup script again
+
+**"FFmpeg not found" error:**
+```bash
+brew install ffmpeg
+```
+
+**"Node not found" error:**
+```bash
+brew install node
+```
 
 ## Actions Available
 

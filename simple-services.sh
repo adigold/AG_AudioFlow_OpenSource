@@ -150,8 +150,41 @@ echo ""
 echo "✅ Ultra-simple AG AudioFlow Services created!"
 echo "Wrapper script created at: $WRAPPER_SCRIPT"
 echo ""
-echo "To activate:"
+
+# Debug information
+echo "🔍 Debug Information:"
+echo "Services directory: $SERVICES_DIR"
+echo "Created services:"
+ls -la "$SERVICES_DIR" | grep "AG AudioFlow" || echo "  No AG AudioFlow services found!"
+echo ""
+
+# Force refresh services
+echo "🔄 Refreshing Services..."
+/System/Library/CoreServices/pbs -flush
+killall Finder 2>/dev/null || true
+sleep 2
+
+echo ""
+echo "📋 Next Steps:"
 echo "1. Go to System Preferences > Keyboard > Shortcuts > Services"
 echo "2. Look for 'AG AudioFlow' services and enable them"
-echo "3. Right-click any audio file and look in Services menu"
+echo "3. If services don't appear, try:"
+echo "   - Restart your Mac"
+echo "   - Run: sudo /System/Library/CoreServices/pbs -flush"
+echo "   - Check that files exist in: $SERVICES_DIR"
+echo "4. Right-click any audio file and look in Services menu"
+echo ""
+
+# Verify wrapper script
+if [ -f "$WRAPPER_SCRIPT" ] && [ -x "$WRAPPER_SCRIPT" ]; then
+    echo "✅ Wrapper script is executable"
+else
+    echo "❌ Wrapper script has issues"
+fi
+
+echo ""
+echo "🚨 If services still don't appear:"
+echo "1. Check System Preferences > Security & Privacy > Privacy > Automation"
+echo "2. Make sure Finder is allowed to control other apps"
+echo "3. Try logging out and back in"
 echo ""

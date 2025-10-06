@@ -15,25 +15,20 @@ A simple command-line tool and macOS Services integration for audio processing. 
 ## Installation
 
 ### Prerequisites
-- macOS 10.13 or later
 - Node.js: `brew install node`
 - FFmpeg: `brew install ffmpeg`
 
-### Quick Install
-
-1. **Download and install:**
+### Install
 ```bash
 git clone https://github.com/adigold/AG_AudioFlow_OpenSource.git
 cd AG_AudioFlow_OpenSource
-./install.sh
+sudo ./install.sh
 ```
 
-2. **Enable Services:**
-   - Go to **System Preferences > Keyboard > Shortcuts > Services**
-   - Find "AG AudioFlow" services and enable them
-   - Right-click any audio file to use
-
-That's it! No complicated paths or configurations.
+### Enable Services
+1. Go to **System Preferences > Keyboard > Shortcuts > Services**
+2. Find "AG AudioFlow" services and enable them
+3. Right-click any audio file to use
 
 ## Uninstall
 

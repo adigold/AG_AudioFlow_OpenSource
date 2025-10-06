@@ -1,75 +1,145 @@
 #!/bin/bash
 
-# AG AudioFlow - Simple Installer for macOS
-# Just works on any Mac without complicated paths
+# AG AudioFlow Standalone Installer
+# Works on any Mac without PATH issues
 
 set -e
 
-echo "🎵 AG AudioFlow Installer"
-echo "========================"
+echo "🎵 AG AudioFlow Standalone Installer"
+echo "====================================="
 echo ""
 
-# Check prerequisites
-echo "Checking prerequisites..."
+# Find Node.js in common locations
+echo "Finding Node.js..."
+NODE_PATH=""
+for path in "/usr/local/bin/node" "/opt/homebrew/bin/node" "$HOME/.volta/bin/node" "/usr/bin/node" "$(which node 2>/dev/null)"; do
+    if [ -f "$path" ] && [ -x "$path" ]; then
+        NODE_PATH="$path"
+        echo "✅ Found Node.js at: $NODE_PATH"
+        break
+    fi
+done
 
-if ! command -v node &> /dev/null; then
-    echo "❌ Node.js required. Install with: brew install node"
+if [ -z "$NODE_PATH" ]; then
+    echo "❌ Node.js not found. Install with: brew install node"
     exit 1
 fi
 
-if ! command -v ffmpeg &> /dev/null; then
-    echo "❌ FFmpeg required. Install with: brew install ffmpeg"
+# Find FFmpeg in common locations
+echo "Finding FFmpeg..."
+FFMPEG_PATH=""
+for path in "/usr/local/bin/ffmpeg" "/opt/homebrew/bin/ffmpeg" "/usr/bin/ffmpeg" "$(which ffmpeg 2>/dev/null)"; do
+    if [ -f "$path" ] && [ -x "$path" ]; then
+        FFMPEG_PATH="$path"
+        echo "✅ Found FFmpeg at: $FFMPEG_PATH"
+        break
+    fi
+done
+
+if [ -z "$FFMPEG_PATH" ]; then
+    echo "❌ FFmpeg not found. Install with: brew install ffmpeg"
     exit 1
 fi
 
-echo "✅ Prerequisites OK"
 echo ""
-
-# Install agaudioflow globally
 echo "Installing AG AudioFlow..."
 
-# Find the agaudioflow script
+# Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 AGAUDIOFLOW_PATH="$SCRIPT_DIR/agaudioflow"
 
 if [ ! -f "$AGAUDIOFLOW_PATH" ]; then
-    echo "❌ Error: agaudioflow script not found at: $AGAUDIOFLOW_PATH"
-    echo "   Make sure you're running this installer from the AG_AudioFlow_OpenSource directory"
-    echo "   Current directory: $(pwd)"
-    echo "   Looking for: $AGAUDIOFLOW_PATH"
+    echo "❌ Error: agaudioflow script not found"
     exit 1
 fi
 
-# Fix the shebang to use env instead of hardcoded path
-echo "Fixing Node.js path in script..."
-NODE_PATH=$(which node)
-echo "Found Node.js at: $NODE_PATH"
+# Create a standalone wrapper with hardcoded paths
+WRAPPER_SCRIPT="/usr/local/bin/agaudioflow-standalone"
 
-# Create a temp file with the correct shebang
-TEMP_SCRIPT="/tmp/agaudioflow.tmp"
-echo "#!/usr/bin/env node" > "$TEMP_SCRIPT"
-tail -n +2 "$AGAUDIOFLOW_PATH" >> "$TEMP_SCRIPT"
+sudo tee "$WRAPPER_SCRIPT" > /dev/null << EOF
+#!/bin/bash
 
-# Copy script to standard location
-sudo cp "$TEMP_SCRIPT" /usr/local/bin/agaudioflow
-sudo chmod +x /usr/local/bin/agaudioflow
-rm "$TEMP_SCRIPT"
+# AG AudioFlow Standalone Wrapper
+# Hardcoded paths for reliability in Service environment
 
-echo "✅ AG AudioFlow installed to /usr/local/bin/agaudioflow"
+ACTION="\$1"
+INPUT_FILE="\$2"
+
+# Hardcoded paths discovered during installation
+NODE_PATH="$NODE_PATH"
+FFMPEG_PATH="$FFMPEG_PATH"
+
+# Export paths so the script can find them
+export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+export NODE="\$NODE_PATH"
+
+# Function to show notification
+notify() {
+    osascript -e "display notification \"\$2\" with title \"AG AudioFlow\" subtitle \"\$1\"" 2>/dev/null || true
+}
+
+# Check arguments
+if [ -z "\$ACTION" ] || [ -z "\$INPUT_FILE" ]; then
+    notify "Error" "No file or action specified"
+    exit 1
+fi
+
+# Check if Node.js exists
+if [ ! -f "\$NODE_PATH" ]; then
+    notify "Error" "Node.js not found at $NODE_PATH"
+    exit 1
+fi
+
+# Get the filename for notifications
+FILENAME=\$(basename "\$INPUT_FILE")
+
+# Show starting notification
+notify "Processing" "Starting \$ACTION on \$FILENAME"
+
+# Create a temporary script with embedded FFmpeg path
+TEMP_SCRIPT="/tmp/agaudioflow-temp-\$\$.js"
+cat > "\$TEMP_SCRIPT" << 'SCRIPT_END'
+$(cat "$AGAUDIOFLOW_PATH" | sed "s|'/opt/homebrew/bin/ffmpeg', '/usr/local/bin/ffmpeg', '/usr/bin/ffmpeg', 'ffmpeg'|'$FFMPEG_PATH', '/opt/homebrew/bin/ffmpeg', '/usr/local/bin/ffmpeg', '/usr/bin/ffmpeg'|")
+SCRIPT_END
+
+# Run the script
+OUTPUT=\$("\$NODE_PATH" "\$TEMP_SCRIPT" "\$ACTION" "\$INPUT_FILE" 2>&1)
+EXIT_CODE=\$?
+
+# Clean up
+rm -f "\$TEMP_SCRIPT"
+
+if [ \$EXIT_CODE -eq 0 ]; then
+    notify "Success" "Completed \$ACTION on \$FILENAME"
+else
+    notify "Failed" "Error: \$OUTPUT"
+fi
+
+exit \$EXIT_CODE
+EOF
+
+sudo chmod +x "$WRAPPER_SCRIPT"
+echo "✅ Standalone wrapper created with hardcoded paths"
+echo "   Node.js: $NODE_PATH"
+echo "   FFmpeg: $FFMPEG_PATH"
 echo ""
 
-# Create services
+# Install the original script too
+sudo cp "$AGAUDIOFLOW_PATH" /usr/local/bin/agaudioflow
+sudo chmod +x /usr/local/bin/agaudioflow
+
+# Create services using the standalone wrapper
 echo "Creating macOS Services..."
 
 SERVICES_DIR="$HOME/Library/Services"
 mkdir -p "$SERVICES_DIR"
 
-# Simple service creation function
 create_service() {
     local action="$1"
     local name="$2"
     local service_dir="$SERVICES_DIR/AG AudioFlow - $name.workflow"
 
+    rm -rf "$service_dir"
     mkdir -p "$service_dir/Contents"
 
     # Create Info.plist
@@ -88,26 +158,17 @@ create_service() {
             </dict>
             <key>NSMessage</key>
             <string>runWorkflowAsService</string>
-            <key>NSRequiredContext</key>
-            <dict>
-                <key>NSApplicationIdentifier</key>
-                <string>com.apple.finder</string>
-            </dict>
             <key>NSSendFileTypes</key>
             <array>
                 <string>public.audio</string>
             </array>
         </dict>
     </array>
-    <key>CFBundleIdentifier</key>
-    <string>com.agaudioflow.$action</string>
-    <key>CFBundleName</key>
-    <string>AG AudioFlow - $name</string>
 </dict>
 </plist>
 EOF
 
-    # Create workflow
+    # Create workflow with standalone wrapper
     cat > "$service_dir/Contents/document.wflow" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -121,7 +182,7 @@ EOF
                 <key>ActionParameters</key>
                 <dict>
                     <key>COMMAND_STRING</key>
-                    <string>for f in "\$@"; do /usr/local/bin/agaudioflow "$action" "\$f"; done</string>
+                    <string>/usr/local/bin/agaudioflow-standalone "$action" "\$1"</string>
                     <key>inputMethod</key>
                     <integer>1</integer>
                     <key>shell</key>
@@ -138,8 +199,6 @@ EOF
         <string>com.apple.Automator.fileSystemObject</string>
         <key>serviceOutputTypeIdentifier</key>
         <string>com.apple.Automator.nothing</string>
-        <key>serviceApplicationBundleIdentifier</key>
-        <string>com.apple.finder</string>
         <key>workflowTypeIdentifier</key>
         <string>com.apple.Automator.servicesMenu</string>
     </dict>
@@ -149,6 +208,10 @@ EOF
 
     echo "  ✅ $name"
 }
+
+# Remove old services first
+echo "Removing old services..."
+rm -rf "$SERVICES_DIR"/AG\ AudioFlow*
 
 # Create all services
 create_service "stereo-to-mono" "Stereo to Mono"
@@ -167,14 +230,16 @@ echo "🔄 Refreshing Services..."
 killall Finder 2>/dev/null || true
 
 echo ""
-echo "🎉 Installation Complete!"
+echo "✅ Installation Complete!"
+echo ""
+echo "The services now use hardcoded paths:"
+echo "  Node.js: $NODE_PATH"
+echo "  FFmpeg: $FFMPEG_PATH"
+echo ""
+echo "This should work even in the limited Service environment."
 echo ""
 echo "Next steps:"
 echo "1. Go to System Preferences > Keyboard > Shortcuts > Services"
-echo "2. Find 'AG AudioFlow' services and enable them"
-echo "3. Right-click any audio file and use Services menu"
-echo ""
-echo "Command line usage:"
-echo "  agaudioflow stereo-to-mono song.wav"
-echo "  agaudioflow normalize audio.mp3"
+echo "2. Enable the AG AudioFlow services"
+echo "3. Right-click an audio file and try a service"
 echo ""

@@ -28,8 +28,20 @@ echo ""
 # Install agaudioflow globally
 echo "Installing AG AudioFlow..."
 
+# Find the agaudioflow script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+AGAUDIOFLOW_PATH="$SCRIPT_DIR/agaudioflow"
+
+if [ ! -f "$AGAUDIOFLOW_PATH" ]; then
+    echo "❌ Error: agaudioflow script not found at: $AGAUDIOFLOW_PATH"
+    echo "   Make sure you're running this installer from the AG_AudioFlow_OpenSource directory"
+    echo "   Current directory: $(pwd)"
+    echo "   Looking for: $AGAUDIOFLOW_PATH"
+    exit 1
+fi
+
 # Copy script to standard location
-sudo cp agaudioflow /usr/local/bin/agaudioflow
+sudo cp "$AGAUDIOFLOW_PATH" /usr/local/bin/agaudioflow
 sudo chmod +x /usr/local/bin/agaudioflow
 
 echo "✅ AG AudioFlow installed to /usr/local/bin/agaudioflow"

@@ -134,7 +134,21 @@ EOF
                     <key>COMMAND_STRING</key>
                     <string>for f in "\$@"
 do
-    "$AGAUDIOFLOW_PATH" "$action" "\$f"
+    # Find agaudioflow script in common locations
+    SCRIPT_PATH=""
+    for path in "\$HOME/AG_AudioFlow_OpenSource/agaudioflow" "\$(dirname "\$0")/agaudioflow" "\$(pwd)/agaudioflow" "\$(which agaudioflow)"; do
+        if [ -f "\$path" ] && [ -x "\$path" ]; then
+            SCRIPT_PATH="\$path"
+            break
+        fi
+    done
+
+    if [ -z "\$SCRIPT_PATH" ]; then
+        echo "Error: agaudioflow script not found"
+        exit 1
+    fi
+
+    "\$SCRIPT_PATH" "$action" "\$f"
 done</string>
                     <key>CheckedForUserDefaultShell</key>
                     <true/>

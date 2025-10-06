@@ -67,9 +67,21 @@ create_simple_service() {
             </dict>
             <key>NSMessage</key>
             <string>runWorkflowAsService</string>
+            <key>NSRequiredContext</key>
+            <dict>
+                <key>NSApplicationIdentifier</key>
+                <string>com.apple.finder</string>
+            </dict>
             <key>NSSendFileTypes</key>
             <array>
                 <string>public.audio</string>
+                <string>public.movie</string>
+                <string>com.apple.quicktime-movie</string>
+                <string>public.mpeg-4</string>
+            </array>
+            <key>NSReturnTypes</key>
+            <array>
+                <string>NSStringPboardType</string>
             </array>
         </dict>
     </array>
@@ -108,6 +120,12 @@ EOF
     </array>
     <key>workflowMetaData</key>
     <dict>
+        <key>serviceInputTypeIdentifier</key>
+        <string>com.apple.Automator.fileSystemObject</string>
+        <key>serviceOutputTypeIdentifier</key>
+        <string>com.apple.Automator.nothing</string>
+        <key>serviceApplicationBundleIdentifier</key>
+        <string>com.apple.finder</string>
         <key>workflowTypeIdentifier</key>
         <string>com.apple.Automator.servicesMenu</string>
     </dict>

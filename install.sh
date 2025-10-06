@@ -40,9 +40,20 @@ if [ ! -f "$AGAUDIOFLOW_PATH" ]; then
     exit 1
 fi
 
+# Fix the shebang to use env instead of hardcoded path
+echo "Fixing Node.js path in script..."
+NODE_PATH=$(which node)
+echo "Found Node.js at: $NODE_PATH"
+
+# Create a temp file with the correct shebang
+TEMP_SCRIPT="/tmp/agaudioflow.tmp"
+echo "#!/usr/bin/env node" > "$TEMP_SCRIPT"
+tail -n +2 "$AGAUDIOFLOW_PATH" >> "$TEMP_SCRIPT"
+
 # Copy script to standard location
-sudo cp "$AGAUDIOFLOW_PATH" /usr/local/bin/agaudioflow
+sudo cp "$TEMP_SCRIPT" /usr/local/bin/agaudioflow
 sudo chmod +x /usr/local/bin/agaudioflow
+rm "$TEMP_SCRIPT"
 
 echo "✅ AG AudioFlow installed to /usr/local/bin/agaudioflow"
 echo ""

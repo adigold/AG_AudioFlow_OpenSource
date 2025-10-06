@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/node
+#!/usr/bin/env node
 
 // AG AudioFlow - Simple Audio Processing Tool for Mac
 // Processes audio files and puts results next to the original file

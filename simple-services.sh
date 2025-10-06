@@ -8,10 +8,19 @@ mkdir -p "$SERVICES_DIR"
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-AGAUDIOFLOW_PATH="$SCRIPT_DIR/agaudioflow"
+
+# Try to find agaudioflow in multiple locations
+if [ -f "$SCRIPT_DIR/agaudioflow" ]; then
+    AGAUDIOFLOW_PATH="$SCRIPT_DIR/agaudioflow"
+elif command -v agaudioflow &> /dev/null; then
+    AGAUDIOFLOW_PATH="$(which agaudioflow)"
+else
+    echo "Error: agaudioflow not found!"
+    exit 1
+fi
 
 # Make sure agaudioflow is executable
-chmod +x "$AGAUDIOFLOW_PATH"
+chmod +x "$AGAUDIOFLOW_PATH" 2>/dev/null || true
 
 # Create simple service scripts
 create_service() {

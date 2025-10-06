@@ -12,7 +12,17 @@ echo ""
 # Find Node.js in common locations
 echo "Finding Node.js..."
 NODE_PATH=""
-for path in "/usr/local/bin/node" "/opt/homebrew/bin/node" "$HOME/.volta/bin/node" "/usr/bin/node" "$(which node 2>/dev/null)"; do
+# Check more locations including nvm, fnm, and other common paths
+for path in \
+    "/usr/local/bin/node" \
+    "/opt/homebrew/bin/node" \
+    "/usr/bin/node" \
+    "$HOME/.volta/bin/node" \
+    "$HOME/.nvm/versions/node/*/bin/node" \
+    "$HOME/.fnm/node-versions/*/installation/bin/node" \
+    "/opt/local/bin/node" \
+    "/usr/local/opt/node/bin/node" \
+    "$(which node 2>/dev/null)"; do
     if [ -f "$path" ] && [ -x "$path" ]; then
         NODE_PATH="$path"
         echo "✅ Found Node.js at: $NODE_PATH"
@@ -20,15 +30,30 @@ for path in "/usr/local/bin/node" "/opt/homebrew/bin/node" "$HOME/.volta/bin/nod
     fi
 done
 
+# Last resort: try to find it anywhere
 if [ -z "$NODE_PATH" ]; then
-    echo "❌ Node.js not found. Install with: brew install node"
+    NODE_PATH=$(find /usr/local /opt/homebrew /usr/bin $HOME/.nvm $HOME/.volta 2>/dev/null -name "node" -type f -perm +111 | head -1)
+fi
+
+if [ -z "$NODE_PATH" ]; then
+    echo "❌ Node.js not found."
+    echo ""
+    echo "Please install Node.js first:"
+    echo "  brew install node"
+    echo "  OR visit: https://nodejs.org"
     exit 1
 fi
 
 # Find FFmpeg in common locations
 echo "Finding FFmpeg..."
 FFMPEG_PATH=""
-for path in "/usr/local/bin/ffmpeg" "/opt/homebrew/bin/ffmpeg" "/usr/bin/ffmpeg" "$(which ffmpeg 2>/dev/null)"; do
+for path in \
+    "/usr/local/bin/ffmpeg" \
+    "/opt/homebrew/bin/ffmpeg" \
+    "/usr/bin/ffmpeg" \
+    "/opt/local/bin/ffmpeg" \
+    "/usr/local/opt/ffmpeg/bin/ffmpeg" \
+    "$(which ffmpeg 2>/dev/null)"; do
     if [ -f "$path" ] && [ -x "$path" ]; then
         FFMPEG_PATH="$path"
         echo "✅ Found FFmpeg at: $FFMPEG_PATH"
@@ -36,8 +61,17 @@ for path in "/usr/local/bin/ffmpeg" "/opt/homebrew/bin/ffmpeg" "/usr/bin/ffmpeg"
     fi
 done
 
+# Last resort: try to find it anywhere
 if [ -z "$FFMPEG_PATH" ]; then
-    echo "❌ FFmpeg not found. Install with: brew install ffmpeg"
+    FFMPEG_PATH=$(find /usr/local /opt/homebrew /usr/bin /opt/local 2>/dev/null -name "ffmpeg" -type f -perm +111 | head -1)
+fi
+
+if [ -z "$FFMPEG_PATH" ]; then
+    echo "❌ FFmpeg not found."
+    echo ""
+    echo "Please install FFmpeg first:"
+    echo "  brew install ffmpeg"
+    echo "  OR download from: https://ffmpeg.org"
     exit 1
 fi
 
@@ -236,10 +270,30 @@ echo "The services now use hardcoded paths:"
 echo "  Node.js: $NODE_PATH"
 echo "  FFmpeg: $FFMPEG_PATH"
 echo ""
-echo "This should work even in the limited Service environment."
+
+# Verify installation
+echo "Verifying installation..."
+if [ -f "/usr/local/bin/agaudioflow-standalone" ] && [ -x "/usr/local/bin/agaudioflow-standalone" ]; then
+    echo "✅ Wrapper script installed correctly"
+else
+    echo "⚠️  Warning: Wrapper script may not be installed correctly"
+fi
+
+SERVICE_COUNT=$(ls "$SERVICES_DIR" | grep -c "AG AudioFlow" || echo "0")
+if [ "$SERVICE_COUNT" -gt 0 ]; then
+    echo "✅ $SERVICE_COUNT AG AudioFlow services created"
+else
+    echo "⚠️  Warning: No services found - check permissions"
+fi
+
 echo ""
 echo "Next steps:"
 echo "1. Go to System Preferences > Keyboard > Shortcuts > Services"
-echo "2. Enable the AG AudioFlow services"
-echo "3. Right-click an audio file and try a service"
+echo "2. Enable the AG AudioFlow services you want to use"
+echo "3. Right-click any audio file and look for AG AudioFlow in Services menu"
+echo ""
+echo "If services don't work:"
+echo "- Restart your Mac"
+echo "- Check Console.app for errors"
+echo "- Make sure you enabled the services in System Preferences"
 echo ""
